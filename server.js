@@ -9,82 +9,81 @@ const PORT = process.env.PORT || 3003;
 // initiate the server
 const app = express();
 
+
+// data parsing
 app.use(express.urlencoded ( { extended: true}));
 app.use(express.json());
 app.use(express.static('public'));
 
-// request database
-const { notes } = require ('./db/db.json');
-
-// function that takes the data from req.body and adds it to db.json file
-function createNewNote (body, notesArray) {
-  const note = body;
-  notesArray.push(note);
-
-  fs.writeFileSync(
-    path.join(__dirname, './db/db.json'),
-    JSON.stringify({ notes : notesArray }, null, 2)
-  );
-  return note;
-};
-
-// validation
-function validateNote (note) {
-  if(!note.title || typeof note.title !== 'string') {
-    return false;
-  }
-  if (!note.text || typeof note.text !== 'string') {
-    return false;
-  }
-  return true;
-};
-
-app.get('/api/notes', (req, res) => {
-  res.json(notes);
-});
-
-// post route
-app.post('/api/notes', (req, res) => {
-  // set id based on what the next index of the array will be
-  req.body.id = notes.length.toString();
-
-  // if any data in req.body is incorrect, send error
-  if (!validateNote(req.body)) {
-    res.status(400).send('The note is not properly formatted.');
-
-  } else {
-    // add content to json file and notes array
-    const note = createNewNote(req.body, notes);
-
-    res.json(note);
-  }
-})
-
-// delete notes
-app.delete('/api/notes/:id', (req, res) => {
-  const id = req.params.id;
-  let note;
-
-  notes.map((element, index) => {
-    if (element.id == id){
-      note = element
-      notes.splice(index, 1)
-      return res.json(note);
-    } 
-  
-  })
-});
-
-// route to index.html 
+// routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname,'./public/index.html'));
 }); 
 
-// route to notes.html 
 app.get('/notes', (req, res) => {
   res.sendFile(path.join(__dirname,'./public/notes.html'));
 }); 
 
+
+// Displays all notes
+app.get("/api/notes", function (req, res) {
+  fs.readFile("db/db.json", "utf8", function (err, notes) {
+      if (err) {
+          console.log(err)
+          return
+      }
+      res.json(JSON.parse(notes));
+  })
+});
+
+
+//Posting note to db.json
+app.post("/api/notes", function (req, res) {
+  const newNote = req.body
+  let notesDB = []
+  fs.readFile(path.join(__dirname + "/db/db.json"), "utf8", function (err, data) {
+      if (err) {
+          return console.log(err);
+      }
+      if (data === "") { // if starting from an empty json file
+          notesDB.push({ "id": 1, "title": newNote.title, "text": newNote.text });
+      } else {
+          notesDB = JSON.parse(data);
+          notesDB.push({ "id": notesDB.length + 1, "title": newNote.title, "text": newNote.text });
+      }
+      // updated notes pushed to db.json
+      fs.writeFile((path.join(__dirname + "/db/db.json")), JSON.stringify(notesDB), function (error) {
+          if (error) { return console.log(error); }
+          res.json(notesDB);
+      });
+  });
+});
+
+// delete notes
+app.delete("/api/notes/:id", function (req, res) {
+  const newNote = req.body
+  const noteID = req.params.id
+  let notesDB = []
+  fs.readFile(path.join(__dirname + "/db/db.json"), "utf8", function (err, data) {
+      if (err) {
+          return console.log(err);
+      }
+      notesDB = JSON.parse(data);
+      notesDB = notesDB.filter(function(object){
+          return object.id != noteID
+      })
+
+      // updated notes pushed to db.json
+      fs.writeFile((path.join(__dirname + "/db/db.json")), JSON.stringify(notesDB), function (error) {
+          if (error) { return console.log(error); }
+          res.json(notesDB);
+      });
+  });
+});
+
+
+// Starts the server
+// ==================================================================
 app.listen(PORT, () => {
     console.log(`API server now live at http://localhost:${PORT}!`);
 });
