@@ -14,7 +14,7 @@
 
 
   ## Installation
-  To install locally, clone the repository from Github and install Node.js and Express.js. Alternatively, use the deployed version at: https://gory-nightmare-07197.herokuapp.com/
+  To install locally, clone the repository from Github and install Node.js and Express.js. Alternatively, use the deployed version at: https://note-taker-95.herokuapp.com/
 
 
   ## Usage
