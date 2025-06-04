@@ -4,15 +4,12 @@ require('dotenv').config();
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const edgeMiddleware = require('./middleware.js');
 
 // port declaration
 const PORT = process.env.PORT || 3003;
 
 // initiate the server
 const app = express();
-
-app.get('/welcome', edgeMiddleware);
 
 // data parsing
 app.use(express.urlencoded ( { extended: true}));
@@ -38,7 +35,6 @@ app.get("/api/notes", function (req, res) {
       res.json(JSON.parse(notes));
   })
 });
-
 
 //Posting note to db.json
 app.post("/api/notes", function (req, res) {
@@ -83,7 +79,6 @@ app.delete("/api/notes/:id", function (req, res) {
       });
   });
 });
-
 
 // Starts the server
 // ==================================================================

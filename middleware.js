@@ -1,27 +1,11 @@
-async function edgeMiddleware(req, res, next) {
-  try {
-    const fetch = (await import('node-fetch')).default;
-    const EDGE_CONFIG_URL = process.env.EDGE_CONFIG;
-    const EDGE_CONFIG_TOKEN = process.env.EDGE_CONFIG_TOKEN;
+import { NextResponse } from 'next/server';
+import { get } from '@vercel/edge-config';
 
-    const response = await fetch(`${EDGE_CONFIG_URL}/item/greeting`, {
-      headers: {
-        'Authorization': `Bearer ${EDGE_CONFIG_TOKEN}`,
-      },
-    });
+export const config = { matcher: '/welcome' };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Edge Config fetch failed:', response.status, errorText);
-      throw new Error('Failed to fetch from Edge Config');
-    }
-
-    const greeting = await response.json();
-    res.json(greeting);
-  } catch (err) {
-    console.error('Edge Config error:', err);
-    res.status(500).json({ error: 'Failed to fetch Edge Config' });
-  }
+export async function middleware() {
+  const greeting = await get('greeting');
+  // NextResponse.json requires at least Next v13.1 or
+  // enabling experimental.allowMiddlewareResponseBody in next.config.js
+  return NextResponse.json(greeting);
 }
-
-module.exports = edgeMiddleware;
