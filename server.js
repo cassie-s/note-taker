@@ -1,7 +1,10 @@
 // required modules
+require('dotenv').config();
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const edgeMiddleware = require('./middleware.js');
 
 // port declaration
 const PORT = process.env.PORT || 3003;
@@ -9,6 +12,7 @@ const PORT = process.env.PORT || 3003;
 // initiate the server
 const app = express();
 
+app.get('/welcome', edgeMiddleware);
 
 // data parsing
 app.use(express.urlencoded ( { extended: true}));
@@ -23,7 +27,6 @@ app.get('/', (req, res) => {
 app.get('/notes', (req, res) => {
   res.sendFile(path.join(__dirname,'./public/notes.html'));
 }); 
-
 
 // Displays all notes
 app.get("/api/notes", function (req, res) {
