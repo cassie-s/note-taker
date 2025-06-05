@@ -1,7 +1,7 @@
 # Note Taker
   ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
   ## Description
-  This application is a simple note taker that uses Express.js to store data on a client-side server. This application is deployed on Heroku.
+  A simple note taker that uses mongoose for data modeling and vanilla javascript on the frontend. Editing notes is a future improvement.
 
   
   ## Table of Contents
@@ -14,7 +14,7 @@
 
 
   ## Installation
-  To install locally, clone the repository from Github and install Node.js and Express.js. Alternatively, use the deployed version at: https://note-taker-95.herokuapp.com/
+  `npm install`. Alternatively, use the [deployed version](https://note-taker-gamma-five.vercel.app/)
 
 
   ## Usage
