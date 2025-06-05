@@ -1,3 +1,14 @@
+require('dotenv').config();
+const mongoose = require('mongoose');
+
+// Connect to MongoDB Atlas
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('Connected to MongoDB Atlas!'))
+.catch((err) => console.error('MongoDB connection error:', err));
+
 // required modules
 const express = require('express');
 const fs = require('fs');
@@ -25,60 +36,45 @@ app.get('/notes', (req, res) => {
 }); 
 
 
-// Displays all notes
-app.get("/api/notes", function (req, res) {
-  fs.readFile("db/db.json", "utf8", function (err, notes) {
-      if (err) {
-          console.log(err)
-          return
-      }
-      res.json(JSON.parse(notes));
-  })
+const Note = require('./models/Note');
+
+// Get all notes
+app.get('/api/notes', async (req, res) => {
+  try {
+    const notes = await Note.find();
+    // Map _id to id for frontend compatibility
+    const mappedNotes = notes.map(note => ({
+      id: note._id,
+      title: note.title,
+      text: note.text
+    }));
+    res.json(mappedNotes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-
-//Posting note to db.json
-app.post("/api/notes", function (req, res) {
-  const newNote = req.body
-  let notesDB = []
-  fs.readFile(path.join(__dirname + "/db/db.json"), "utf8", function (err, data) {
-      if (err) {
-          return console.log(err);
-      }
-      if (data === "") { // if starting from an empty json file
-          notesDB.push({ "id": 1, "title": newNote.title, "text": newNote.text });
-      } else {
-          notesDB = JSON.parse(data);
-          notesDB.push({ "id": notesDB.length + 1, "title": newNote.title, "text": newNote.text });
-      }
-      // updated notes pushed to db.json
-      fs.writeFile((path.join(__dirname + "/db/db.json")), JSON.stringify(notesDB), function (error) {
-          if (error) { return console.log(error); }
-          res.json(notesDB);
-      });
-  });
+// Save a new note
+app.post('/api/notes', async (req, res) => {
+  try {
+    const { title, text } = req.body;
+    const newNote = new Note({ title, text });
+    await newNote.save();
+    res.status(201).json(newNote);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// delete notes
-app.delete("/api/notes/:id", function (req, res) {
-  const newNote = req.body
-  const noteID = req.params.id
-  let notesDB = []
-  fs.readFile(path.join(__dirname + "/db/db.json"), "utf8", function (err, data) {
-      if (err) {
-          return console.log(err);
-      }
-      notesDB = JSON.parse(data);
-      notesDB = notesDB.filter(function(object){
-          return object.id != noteID
-      })
-
-      // updated notes pushed to db.json
-      fs.writeFile((path.join(__dirname + "/db/db.json")), JSON.stringify(notesDB), function (error) {
-          if (error) { return console.log(error); }
-          res.json(notesDB);
-      });
-  });
+// Delete a note by ID
+app.delete('/api/notes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Note.findByIdAndDelete(id);
+    res.status(204).end();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
