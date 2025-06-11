@@ -19,6 +19,12 @@ module.exports = async (req, res) => {
     return res.status(204).end();
   }
 
+  if (req.method === 'PUT') {
+    const { title, text } = req.body;
+    await Note.findByIdAndUpdate(id, { title, text });
+    return res.status(200).json({ id, title, text });
+  }
+
   res.setHeader('Allow', ['DELETE']);
   res.status(405).end(`Method ${req.method} Not Allowed`);
 };

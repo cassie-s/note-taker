@@ -14,7 +14,7 @@
 
 
   ## Installation
-  `npm install`. Alternatively, use the [deployed version](https://note-taker-gamma-five.vercel.app/)
+  `npm install`. For development, `vercel dev`. Alternatively, use the [deployed version](https://note-taker-gamma-five.vercel.app/)
 
 
   ## Usage

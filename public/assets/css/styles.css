@@ -9,6 +9,10 @@ body {
   display: none;
 }
 
+.edit-note{
+  margin-left: 10px;
+}
+
 .icons i {
   margin-left: 15px;
   margin-right: 15px;
